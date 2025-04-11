@@ -14,6 +14,6 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
       ? 'https://dyblit.netlify.app'
       : 'http://localhost:8888';
     
-    window.location.href = `${baseUrl}/.netlify/functions/discord-auth`;
+    window.location.href = `${baseUrl}/api/discord-auth`;
   },
 }));
