@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { supabase } from './supabase';
 
 interface DiscordState {
   isLoading: boolean;
