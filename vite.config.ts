@@ -5,12 +5,21 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2020',
+    outDir: 'dist',
+    sourcemap: true,
     rollupOptions: {
-      external: ['discord-oauth2'],
       output: {
-        globals: {
-          'discord-oauth2': 'DiscordOAuth2'
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'framer-motion', '@supabase/supabase-js']
         }
+      }
+    }
+  },
+  server: {
+    proxy: {
+      '/.netlify/functions': {
+        target: 'http://localhost:8888',
+        changeOrigin: true
       }
     }
   }

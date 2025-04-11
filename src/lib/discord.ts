@@ -10,6 +10,10 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
   isLoading: false,
   error: null,
   login: () => {
-    window.location.href = '/.netlify/functions/discord-auth';
+    const baseUrl = import.meta.env.PROD 
+      ? 'https://dyblit.netlify.app'
+      : 'http://localhost:8888';
+    
+    window.location.href = `${baseUrl}/.netlify/functions/discord-auth`;
   },
 }));
