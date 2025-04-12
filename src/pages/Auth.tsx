@@ -12,13 +12,20 @@ const Auth = () => {
   useEffect(() => {
     const handleAuth = async () => {
       try {
+        console.log('Checking session...');
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw sessionError;
+        }
         
         if (!session) {
+          console.error('No session found');
           throw new Error('No session found');
         }
+
+        console.log('Session found:', session);
 
         // Get user data from our database
         const { data: userData, error: userError } = await supabase
@@ -27,25 +34,37 @@ const Auth = () => {
           .eq('discord_id', session.user.user_metadata.provider_id)
           .single();
 
-        if (userError) throw userError;
+        if (userError) {
+          console.error('User data error:', userError);
+          // Only throw if it's not a "no rows returned" error
+          if (userError.code !== 'PGRST116') {
+            throw userError;
+          }
+        }
 
         if (!userData) {
+          console.log('Creating new user...');
           // Create new user if they don't exist
           const { data: newUser, error: createError } = await supabase
             .from('users')
             .insert({
               discord_id: session.user.user_metadata.provider_id,
-              username: session.user.user_metadata.full_name,
+              username: session.user.user_metadata.full_name || session.user.user_metadata.custom_claims.global_name,
               avatar_url: session.user.user_metadata.avatar_url,
               diamonds_balance: 0,
             })
             .select()
             .single();
 
-          if (createError) throw createError;
+          if (createError) {
+            console.error('User creation error:', createError);
+            throw createError;
+          }
           
+          console.log('New user created:', newUser);
           setUser(newUser);
         } else {
+          console.log('Existing user found:', userData);
           setUser(userData);
         }
 

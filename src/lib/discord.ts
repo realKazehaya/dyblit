@@ -13,22 +13,30 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
   login: async () => {
     try {
       set({ isLoading: true, error: null });
+      console.log('Starting Discord authentication...');
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
           scopes: 'identify email',
+          queryParams: {
+            prompt: 'consent'
+          }
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase OAuth error:', error);
+        throw error;
+      }
       
       if (!data.url) {
+        console.error('No authentication URL received');
         throw new Error('No authentication URL received');
       }
 
-      // Redirect to Discord OAuth
+      console.log('Redirecting to Discord OAuth...');
       window.location.href = data.url;
     } catch (error) {
       console.error('Discord login error:', error);
