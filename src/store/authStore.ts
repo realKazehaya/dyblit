@@ -39,67 +39,75 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       console.log('Starting login process for ID:', freeFireId);
 
+      // First, create or sign in the user
+      const email = `${freeFireId}@dyblit.temp`;
+      const password = `${freeFireId}${Date.now()}`;
+
+      console.log('Attempting to sign in...');
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        if (signInError.status === 400) {
+          console.log('User does not exist, creating new account...');
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+          });
+
+          if (signUpError || !signUpData.user) {
+            console.error('Error creating user account:', signUpError);
+            throw new Error(`Failed to create account: ${signUpError?.message || 'Unknown error'}`);
+          }
+
+          console.log('User account created:', { id: signUpData.user.id });
+        } else {
+          console.error('Sign in error:', signInError);
+          throw new Error(`Authentication error: ${signInError.message}`);
+        }
+      }
+
+      // Get the current session
+      console.log('Getting current session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError);
+        throw new Error('Failed to get session');
+      }
+
+      console.log('Session obtained:', { userId: session.user.id });
+
       // Check if profile exists
       console.log('Checking for existing profile...');
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
-        .select()
+        .select('*')
         .eq('free_fire_id', freeFireId)
         .single();
 
       console.log('Profile check response:', { existingProfile, profileError });
 
-      if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          console.log('No existing profile found, will create new one');
-        } else {
-          console.error('Error checking existing profile:', profileError);
-          throw new Error(`Database error: ${profileError.message}`);
-        }
-      }
-
       if (existingProfile) {
         console.log('Found existing profile:', existingProfile);
-        
-        // Try to sign in with existing credentials
-        console.log('Signing in with existing account...');
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: `${freeFireId}@dyblit.temp`,
-          password: `${freeFireId}${existingProfile.created_at}`,
-        });
-
-        if (signInError) {
-          console.error('Error signing in:', signInError);
-          throw new Error(`Authentication error: ${signInError.message}`);
-        }
-
         set({ 
           profile: existingProfile,
           isAdmin: existingProfile.free_fire_id === '999'
         });
-        console.log('Successfully logged in existing user');
         return;
       }
 
-      // Create new user account
-      console.log('Creating new user account...');
-      const password = `${freeFireId}${Date.now()}`;
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email: `${freeFireId}@dyblit.temp`,
-        password,
-      });
-
-      if (signUpError || !user) {
-        console.error('Error creating user account:', signUpError);
-        throw new Error(`Failed to create account: ${signUpError?.message || 'Unknown error'}`);
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error checking profile:', profileError);
+        throw new Error(`Database error: ${profileError.message}`);
       }
-
-      console.log('User account created:', { id: user.id, email: user.email });
 
       // Create new profile
       const randomNickname = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
       const newProfile: Partial<Profile> = {
-        id: user.id,
+        id: session.user.id,
         free_fire_id: freeFireId,
         nickname: randomNickname,
         nickname_changes: 0,
