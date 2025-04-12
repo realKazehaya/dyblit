@@ -39,49 +39,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       console.log('Starting login process for ID:', freeFireId);
 
-      // First, create or sign in the user
+      // Validate Free Fire ID format
+      if (!/^\d{4,11}$/.test(freeFireId)) {
+        throw new Error('Free Fire ID must be between 4 and 11 digits');
+      }
+
+      // Generate email and password for this user
       const email = `${freeFireId}@dyblit.temp`;
       const password = `${freeFireId}${Date.now()}`;
 
-      console.log('Attempting to sign in...');
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        if (signInError.status === 400) {
-          console.log('User does not exist, creating new account...');
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-          });
-
-          if (signUpError || !signUpData.user) {
-            console.error('Error creating user account:', signUpError);
-            throw new Error(`Failed to create account: ${signUpError?.message || 'Unknown error'}`);
-          }
-
-          console.log('User account created:', { id: signUpData.user.id });
-        } else {
-          console.error('Sign in error:', signInError);
-          throw new Error(`Authentication error: ${signInError.message}`);
-        }
-      }
-
-      // Get the current session
-      console.log('Getting current session...');
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        console.error('Session error:', sessionError);
-        throw new Error('Failed to get session');
-      }
-
-      console.log('Session obtained:', { userId: session.user.id });
-
-      // Check if profile exists
-      console.log('Checking for existing profile...');
+      // Check if profile exists first
+      console.log('Checking if profile exists...');
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -91,7 +59,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.log('Profile check response:', { existingProfile, profileError });
 
       if (existingProfile) {
-        console.log('Found existing profile:', existingProfile);
+        console.log('Found existing profile, signing in...');
+        const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
+          email: `${existingProfile.id}@dyblit.temp`,
+          password: `${existingProfile.free_fire_id}${existingProfile.created_at}`,
+        });
+
+        if (signInError) {
+          console.error('Sign in error:', signInError);
+          throw new Error('Failed to sign in');
+        }
+
+        console.log('Successfully signed in existing user');
         set({ 
           profile: existingProfile,
           isAdmin: existingProfile.free_fire_id === '999'
@@ -99,15 +78,43 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error checking profile:', profileError);
-        throw new Error(`Database error: ${profileError.message}`);
+      // If profile doesn't exist, create new account
+      console.log('No existing profile found, creating new account...');
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (signUpError) {
+        console.error('Error creating account:', signUpError);
+        
+        // If user already exists, try signing in
+        if (signUpError.message.includes('already registered')) {
+          console.log('User exists, attempting to sign in...');
+          const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password: `${freeFireId}${Date.now()}`, // Use consistent password format
+          });
+
+          if (signInError) {
+            console.error('Sign in error:', signInError);
+            throw new Error('Failed to sign in');
+          }
+        } else {
+          throw new Error('Failed to create account');
+        }
       }
+
+      if (!user) {
+        throw new Error('No user returned after signup');
+      }
+
+      console.log('Created new account:', { userId: user.id });
 
       // Create new profile
       const randomNickname = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
       const newProfile: Partial<Profile> = {
-        id: session.user.id,
+        id: user.id,
         free_fire_id: freeFireId,
         nickname: randomNickname,
         nickname_changes: 0,
@@ -123,7 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (insertError || !profile) {
         console.error('Error creating profile:', insertError);
-        throw new Error(`Failed to create profile: ${insertError?.message || 'Unknown error'}`);
+        throw new Error('Failed to create profile');
       }
 
       console.log('Profile created successfully:', profile);

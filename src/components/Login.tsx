@@ -38,6 +38,11 @@ export default function Login() {
     setError('');
 
     try {
+      // Validate Free Fire ID format
+      if (!/^\d{4,11}$/.test(freeFireId)) {
+        throw new Error('Free Fire ID must be between 4 and 11 digits');
+      }
+
       console.log('Attempting login with ID:', freeFireId);
       await login(freeFireId);
       console.log('Login successful, redirecting...');
@@ -54,9 +59,9 @@ export default function Login() {
     <main className="container mx-auto px-4 py-16">
       <div className="flex flex-col items-center text-center space-y-8">
         <h1 className="text-4xl md:text-5xl font-bold">
-          Earn Free Fire Diamonds
+          DYBLIT
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-            Watch Ads & Complete Surveys
+            Free Fire Diamonds
           </span>
         </h1>
         
@@ -92,10 +97,15 @@ export default function Login() {
               <input
                 id="freeFireId"
                 type="text"
+                pattern="\d{4,11}"
+                maxLength={11}
                 value={freeFireId}
-                onChange={(e) => setFreeFireId(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setFreeFireId(value);
+                }}
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
-                placeholder="Enter your Free Fire ID"
+                placeholder="Enter your Free Fire ID (4-11 digits)"
                 required
                 disabled={isLoading}
               />
