@@ -1,66 +1,64 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../lib/auth';
-import { authenticateWithDiscord } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 const Auth = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
   const [error, setError] = React.useState<string | null>(null);
 
   useEffect(() => {
-    const code = searchParams.get('code');
-    const errorParam = searchParams.get('error');
-
-    console.log('Auth Page Loaded:', {
-      code: code ? 'Present' : 'Missing',
-      error: errorParam || 'None'
-    });
-
-    if (errorParam) {
-      console.error('Discord auth error from params:', errorParam);
-      setError(`Authentication error: ${errorParam}`);
-      setTimeout(() => navigate('/'), 3000);
-      return;
-    }
-
-    if (code) {
-      const handleAuth = async () => {
-        try {
-          console.log('Starting authentication process...');
-          const { user } = await authenticateWithDiscord(code);
-          
-          if (!user) {
-            throw new Error('No user data received');
-          }
-
-          console.log('Authentication successful');
-          setUser({
-            id: user.id,
-            discord_id: user.user_metadata.discord_id,
-            username: user.user_metadata.username,
-            avatar_url: user.user_metadata.avatar_url,
-            diamonds_balance: 0,
-            created_at: user.created_at,
-          });
-
-          navigate('/dashboard');
-        } catch (error) {
-          console.error('Authentication error:', error);
-          setError(error instanceof Error ? error.message : 'An error occurred during authentication');
-          setTimeout(() => navigate('/'), 3000);
+    const handleAuth = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
+        
+        if (!session) {
+          throw new Error('No session found');
         }
-      };
 
-      handleAuth();
-    } else {
-      console.error('No code provided in URL');
-      setError('No authentication code provided');
-      setTimeout(() => navigate('/'), 3000);
-    }
-  }, [searchParams, navigate, setUser]);
+        // Get user data from our database
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('discord_id', session.user.user_metadata.provider_id)
+          .single();
+
+        if (userError) throw userError;
+
+        if (!userData) {
+          // Create new user if they don't exist
+          const { data: newUser, error: createError } = await supabase
+            .from('users')
+            .insert({
+              discord_id: session.user.user_metadata.provider_id,
+              username: session.user.user_metadata.full_name,
+              avatar_url: session.user.user_metadata.avatar_url,
+              diamonds_balance: 0,
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          
+          setUser(newUser);
+        } else {
+          setUser(userData);
+        }
+
+        navigate('/dashboard');
+      } catch (error) {
+        console.error('Authentication error:', error);
+        setError(error instanceof Error ? error.message : 'Authentication failed');
+        setTimeout(() => navigate('/'), 3000);
+      }
+    };
+
+    handleAuth();
+  }, [navigate, setUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

@@ -2,62 +2,46 @@ import { supabase } from './supabase';
 
 export async function authenticateWithDiscord(code: string) {
   try {
-    console.log('Authenticating with Discord...');
+    console.log('Starting Discord authentication process...');
     
-    // Sign in with Supabase using Discord OAuth
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        queryParams: {
-          code,
-          grant_type: 'authorization_code',
-        },
+    // Exchange the code for Discord tokens using our API endpoint
+    const response = await fetch('/api/discord-auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ code }),
     });
 
-    if (error) {
-      console.error('Supabase auth error:', error);
-      throw error;
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Discord auth error:', error);
+      throw new Error(error.details || 'Failed to authenticate with Discord');
     }
 
-    if (!data.user) {
-      throw new Error('No user data received from authentication');
-    }
+    const { access_token, user: discordUser } = await response.json();
 
-    // Check if user exists in our database
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('users')
-      .select()
-      .eq('discord_id', data.user.user_metadata.discord_id)
-      .single();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error fetching user:', fetchError);
-      throw fetchError;
-    }
-
-    if (!existingUser) {
-      console.log('Creating new user...');
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert({
-          discord_id: data.user.user_metadata.discord_id,
-          username: data.user.user_metadata.username,
-          avatar_url: data.user.user_metadata.avatar_url,
-          diamonds_balance: 0,
-        })
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('Error creating user:', createError);
-        throw createError;
+    // Sign in with Supabase using Discord ID as email
+    const { data: authData, error: signInError } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: window.location.origin,
       }
+    });
 
-      return { user: data.user, session: data.session };
+    if (signInError) {
+      console.error('Supabase sign in error:', signInError);
+      throw signInError;
     }
 
-    return { user: data.user, session: data.session };
+    if (!authData.url) {
+      throw new Error('No authentication URL received');
+    }
+
+    // Redirect to Supabase OAuth flow
+    window.location.href = authData.url;
+    return { user: null, session: null }; // The page will reload after OAuth
+
   } catch (error) {
     console.error('Authentication error:', error);
     throw error;

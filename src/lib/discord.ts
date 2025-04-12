@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { supabase } from './supabase';
 
 interface DiscordState {
   isLoading: boolean;
@@ -9,36 +10,31 @@ interface DiscordState {
 export const useDiscordAuth = create<DiscordState>((set) => ({
   isLoading: false,
   error: null,
-  login: () => {
+  login: async () => {
     try {
-      const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
-      const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
+      set({ isLoading: true, error: null });
       
-      console.log('Discord Auth Config:', {
-        clientId: clientId ? 'Present' : 'Missing',
-        redirectUri: redirectUri ? 'Present' : 'Missing'
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'identify email',
+        }
       });
+
+      if (error) throw error;
       
-      if (!clientId || !redirectUri) {
-        const error = 'Missing Discord configuration';
-        console.error(error, { clientId, redirectUri });
-        set({ error });
-        return;
+      if (!data.url) {
+        throw new Error('No authentication URL received');
       }
 
-      const params = new URLSearchParams({
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: 'code',
-        scope: 'identify email guilds',
-      });
-
-      const url = `https://discord.com/oauth2/authorize?${params.toString()}`;
-      console.log('Redirecting to Discord:', url);
-      window.location.href = url;
+      // Redirect to Discord OAuth
+      window.location.href = data.url;
     } catch (error) {
       console.error('Discord login error:', error);
-      set({ error: 'Failed to initialize Discord login' });
+      set({ error: error instanceof Error ? error.message : 'Failed to login' });
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));
