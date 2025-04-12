@@ -23,10 +23,11 @@ export const useLanguageStore = create<LanguageState>()(
 export const translations = {
   en: {
     nav: {
-      earn: 'Earn',
-      dashboard: 'Dashboard',
-      withdraw: 'Withdraw',
-      support: 'Support'
+      earn: 'EARN',
+      dashboard: 'DASHBOARD',
+      withdraw: 'WITHDRAW',
+      support: 'SUPPORT',
+      login: 'LOGIN'
     },
     welcome: {
       title: 'Welcome to FF Rewards!',
@@ -53,68 +54,38 @@ export const translations = {
       },
       login: 'Login with Discord'
     },
-    earn: {
-      title: 'Earn Diamonds',
-      subtitle: 'Choose any of our offerwalls to start earning diamonds. Complete surveys, try apps, and more.',
-      guaranteed: {
-        title: 'Guaranteed Rewards',
-        description: 'All completed offers are verified and rewarded automatically. Diamonds will be added to your account instantly.'
-      },
-      tips: {
-        title: 'Important Tips',
-        list: [
-          'Use real information in surveys',
-          'Complete offers until the end',
-          'Don\'t use VPN or fake data'
-        ]
-      },
-      button: 'Earn'
-    },
     support: {
-      title: 'Support Center',
-      description: 'Need help? We\'re here for you!',
-      categories: {
-        faq: 'Frequently Asked Questions',
-        contact: 'Contact Us',
-        discord: 'Join our Discord'
-      },
+      description: 'Find answers to commonly asked questions about FF Rewards',
       faq: {
-        title: 'FAQ',
+        title: 'Frequently Asked Questions',
         questions: [
           {
             q: 'How do I earn diamonds?',
-            a: 'Complete offers from our offerwall partners. Each completed offer rewards you with diamonds.'
+            a: 'You can earn diamonds by completing offers from our advertising partners. Each completed offer will reward you with a specific amount of diamonds.'
           },
           {
-            q: 'When will I receive my diamonds?',
-            a: 'Diamonds are credited automatically after offer completion, usually within a few minutes.'
+            q: 'How long do withdrawals take?',
+            a: 'Withdrawals are typically processed within 24 hours. Once approved, diamonds are sent directly to your Free Fire account.'
           },
           {
-            q: 'How do I withdraw my diamonds?',
-            a: 'Go to the withdraw page, enter your Free Fire ID and the amount of diamonds you want to withdraw.'
+            q: 'What is the minimum withdrawal amount?',
+            a: 'The minimum withdrawal amount is 100 diamonds. This helps us process withdrawals more efficiently.'
+          },
+          {
+            q: 'Why was my withdrawal rejected?',
+            a: 'Withdrawals may be rejected if the Free Fire ID is incorrect or if there are suspicious activities on the account. Contact support for more information.'
           }
         ]
       }
-    },
-    withdraw: {
-      title: 'Withdraw Diamonds',
-      freeFireId: 'Free Fire ID',
-      amount: 'Amount of Diamonds',
-      submit: 'Request Withdrawal',
-      important: 'Important Information',
-      tips: [
-        'Withdrawals are processed within 24 hours.',
-        'Make sure to enter your Free Fire ID correctly.',
-        'Minimum withdrawal amount is 100 diamonds.'
-      ]
     }
   },
   es: {
     nav: {
-      earn: 'Ganar',
-      dashboard: 'Panel',
-      withdraw: 'Retirar',
-      support: 'Soporte'
+      earn: 'GANAR',
+      dashboard: 'PANEL',
+      withdraw: 'RETIRAR',
+      support: 'SOPORTE',
+      login: 'ENTRAR'
     },
     welcome: {
       title: '¡Bienvenido a FF Rewards!',
@@ -141,60 +112,29 @@ export const translations = {
       },
       login: 'Iniciar sesión con Discord'
     },
-    earn: {
-      title: 'Ganar Diamantes',
-      subtitle: 'Elige cualquiera de nuestros offerwalls para empezar a ganar diamantes. Completa encuestas, prueba aplicaciones y más.',
-      guaranteed: {
-        title: 'Recompensas Garantizadas',
-        description: 'Todas las ofertas completadas son verificadas y recompensadas automáticamente. Los diamantes se añadirán a tu cuenta al instante.'
-      },
-      tips: {
-        title: 'Consejos Importantes',
-        list: [
-          'Usa información real en las encuestas',
-          'Completa las ofertas hasta el final',
-          'No uses VPN o datos falsos'
-        ]
-      },
-      button: 'Ganar'
-    },
     support: {
-      title: 'Centro de Soporte',
-      description: '¿Necesitas ayuda? ¡Estamos aquí para ti!',
-      categories: {
-        faq: 'Preguntas Frecuentes',
-        contact: 'Contáctanos',
-        discord: 'Únete a Discord'
-      },
+      description: 'Encuentra respuestas a preguntas frecuentes sobre FF Rewards',
       faq: {
         title: 'Preguntas Frecuentes',
         questions: [
           {
             q: '¿Cómo gano diamantes?',
-            a: 'Completa ofertas de nuestros socios de offerwall. Cada oferta completada te recompensa con diamantes.'
+            a: 'Puedes ganar diamantes completando ofertas de nuestros socios publicitarios. Cada oferta completada te recompensará con una cantidad específica de diamantes.'
           },
           {
-            q: '¿Cuándo recibiré mis diamantes?',
-            a: 'Los diamantes se acreditan automáticamente después de completar la oferta, generalmente en unos minutos.'
+            q: '¿Cuánto tardan los retiros?',
+            a: 'Los retiros generalmente se procesan dentro de las 24 horas. Una vez aprobados, los diamantes se envían directamente a tu cuenta de Free Fire.'
           },
           {
-            q: '¿Cómo retiro mis diamantes?',
-            a: 'Ve a la página de retiro, ingresa tu ID de Free Fire y la cantidad de diamantes que deseas retirar.'
+            q: '¿Cuál es el monto mínimo de retiro?',
+            a: 'El monto mínimo de retiro es de 100 diamantes. Esto nos ayuda a procesar los retiros de manera más eficiente.'
+          },
+          {
+            q: '¿Por qué fue rechazado mi retiro?',
+            a: 'Los retiros pueden ser rechazados si el ID de Free Fire es incorrecto o si hay actividades sospechosas en la cuenta. Contacta a soporte para más información.'
           }
         ]
       }
-    },
-    withdraw: {
-      title: 'Retirar Diamantes',
-      freeFireId: 'ID de Free Fire',
-      amount: 'Cantidad de Diamantes',
-      submit: 'Solicitar Retiro',
-      important: 'Información Importante',
-      tips: [
-        'Los retiros se procesan en un plazo de 24 horas.',
-        'Asegúrate de ingresar correctamente tu ID de Free Fire.',
-        'El monto mínimo de retiro es de 100 diamantes.'
-      ]
     }
   }
 };

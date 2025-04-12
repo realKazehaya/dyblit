@@ -1,57 +1,84 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Diamond, CheckCircle, DollarSign } from 'lucide-react';
-import { useLanguageStore, translations } from '../lib/i18n';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '../lib/auth';
+import { useDiscordAuth } from '../lib/discord';
 
 const Home = () => {
-  const { language } = useLanguageStore();
-  const t = translations[language].home;
+  const { isAuthenticated } = useAuthStore();
+  const { login } = useDiscordAuth();
+  const [currentLetterIndex, setCurrentLetterIndex] = React.useState(-1);
+
+  const title = "DYBLIT";
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentLetterIndex((prev) => (prev + 1) % (title.length + 1));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
-        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400">
-          {t.title}
-        </h1>
-        <p className="mt-4 text-xl text-gray-300">
-          {t.subtitle}
-        </p>
-      </motion.div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative min-h-[80vh] flex flex-col items-center justify-center">
+      {/* Floating Cloud */}
+      <motion.img
+        src="/cloud.webp"
+        alt="Floating Cloud"
+        className="absolute w-64 opacity-50"
+        animate={{
+          y: [0, -20, 0],
+          x: [-10, 10, -10]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        style={{
+          filter: 'brightness(0.8) contrast(1.2)'
+        }}
+      />
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
-      >
-        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
-          <Diamond className="w-12 h-12 text-red-400 mb-4" />
-          <h3 className="text-xl font-semibold mb-2 text-white">{t.features.earn.title}</h3>
-          <p className="text-gray-300">
-            {t.features.earn.description}
-          </p>
-        </div>
+      {/* Animated Title */}
+      <div className="text-6xl md:text-8xl font-bold relative z-10 flex">
+        {title.split('').map((letter, index) => (
+          <AnimatePresence key={index} mode="wait">
+            <motion.span
+              initial={{ opacity: 1, y: 0 }}
+              animate={{
+                opacity: currentLetterIndex === index ? 0 : 1,
+                y: currentLetterIndex === index ? 20 : 0
+              }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut"
+              }}
+              className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400"
+              style={{ width: '1em', textAlign: 'center' }}
+              whileHover={{
+                scale: 1.2,
+                transition: { duration: 0.2 }
+              }}
+            >
+              {letter}
+            </motion.span>
+          </AnimatePresence>
+        ))}
+      </div>
 
-        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
-          <CheckCircle className="w-12 h-12 text-red-400 mb-4" />
-          <h3 className="text-xl font-semibold mb-2 text-white">{t.features.withdraw.title}</h3>
-          <p className="text-gray-300">
-            {t.features.withdraw.description}
-          </p>
-        </div>
-
-        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
-          <DollarSign className="w-12 h-12 text-red-400 mb-4" />
-          <h3 className="text-xl font-semibold mb-2 text-white">{t.features.daily.title}</h3>
-          <p className="text-gray-300">
-            {t.features.daily.description}
-          </p>
-        </div>
-      </motion.div>
+      {/* Start Now Button */}
+      {!isAuthenticated && (
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          onClick={() => login()}
+          className="mt-12 px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl text-white font-bold text-xl shadow-lg hover:shadow-red-500/20 transition-all duration-300 hover:scale-105"
+        >
+          START NOW
+        </motion.button>
+      )}
     </div>
   );
 };
