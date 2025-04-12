@@ -30,7 +30,7 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: 'code',
-        scope: 'identify email',
+        scope: 'identify email guilds',
       });
 
       const url = `https://discord.com/oauth2/authorize?${params.toString()}`;
