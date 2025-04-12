@@ -10,6 +10,22 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
   isLoading: false,
   error: null,
   login: () => {
-    window.location.href = 'https://discord.com/oauth2/authorize?client_id=1360381434115915996&response_type=code&redirect_uri=https%3A%2F%2Fdyblit.vercel.app%2Fauth%2Fcallback&scope=identify+email';
+    const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
+    
+    if (!clientId || !redirectUri) {
+      console.error('Missing Discord configuration');
+      set({ error: 'Discord configuration is missing' });
+      return;
+    }
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'identify email',
+    });
+
+    window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
   },
 }));

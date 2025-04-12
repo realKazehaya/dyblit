@@ -1,13 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
 import DiscordOauth2 from 'discord-oauth2';
+import { createClient } from '@supabase/supabase-js';
 
-const oauth = new DiscordOauth2();
+const oauth = new DiscordOauth2({
+  clientId: process.env.VITE_DISCORD_CLIENT_ID,
+  clientSecret: process.env.DISCORD_CLIENT_SECRET,
+  redirectUri: process.env.VITE_DISCORD_REDIRECT_URI,
+});
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -19,23 +20,17 @@ export default async function handler(
   }
 
   try {
-    // Get Discord tokens
     const tokens = await oauth.tokenRequest({
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
       code,
       scope: 'identify email',
       grantType: 'authorization_code',
-      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     });
 
-    // Get user info from Discord
     const userData = await oauth.getUser(tokens.access_token);
 
-    // Initialize Supabase client
     const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.VITE_SUPABASE_URL!,
+      process.env.VITE_SUPABASE_ANON_KEY!
     );
 
     // Check if user exists
@@ -52,20 +47,28 @@ export default async function handler(
         .insert({
           discord_id: userData.id,
           username: userData.username,
-          avatar_url: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
+          avatar_url: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : null,
           diamonds_balance: 0,
         });
 
-      if (createError) throw createError;
+      if (createError) {
+        console.error('Error creating user:', createError);
+        throw createError;
+      }
     }
 
-    // Create Supabase session
-    const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
+    // Sign in with Supabase
+    const { data: authData, error: authError } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
-      token: tokens.access_token,
+      options: {
+        redirectTo: process.env.VITE_DISCORD_REDIRECT_URI,
+      }
     });
 
-    if (authError) throw authError;
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw authError;
+    }
 
     return res.status(200).json({
       access_token: tokens.access_token,
