@@ -15,7 +15,7 @@ const Auth = () => {
     if (code) {
       const authenticateWithDiscord = async () => {
         try {
-          const response = await fetch('/api/auth/discord', {
+          const response = await fetch('/.netlify/functions/discord-auth', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
