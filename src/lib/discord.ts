@@ -26,6 +26,7 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
       scope: 'identify email',
     });
 
-    window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
+    const url = `https://discord.com/oauth2/authorize?${params.toString()}`;
+    window.location.href = url;
   },
 }));
