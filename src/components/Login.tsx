@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gamepad2, Gift, Shield, LogIn } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
   const [freeFireId, setFreeFireId] = useState('');
@@ -10,6 +11,26 @@ export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore(state => state.login);
   const isAdmin = useAuthStore(state => state.isAdmin);
+
+  // Test Supabase connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const { error } = await supabase.from('profiles').select('count').limit(0);
+        if (error) {
+          console.error('Supabase connection test failed:', error);
+          setError('Unable to connect to the server. Please try again later.');
+        } else {
+          console.log('Supabase connection test successful');
+        }
+      } catch (err) {
+        console.error('Supabase connection test error:', err);
+        setError('Unable to connect to the server. Please try again later.');
+      }
+    };
+
+    testConnection();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +44,7 @@ export default function Login() {
       navigate(isAdmin ? '/admin' : '/dashboard');
     } catch (err) {
       console.error('Login failed:', err);
-      setError('Login failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
