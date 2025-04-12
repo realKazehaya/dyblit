@@ -34,12 +34,9 @@ const Auth = () => {
           .eq('discord_id', session.user.user_metadata.provider_id)
           .single();
 
-        if (userError) {
+        if (userError && userError.code !== 'PGRST116') {
           console.error('User data error:', userError);
-          // Only throw if it's not a "no rows returned" error
-          if (userError.code !== 'PGRST116') {
-            throw userError;
-          }
+          throw userError;
         }
 
         if (!userData) {
@@ -49,7 +46,7 @@ const Auth = () => {
             .from('users')
             .insert({
               discord_id: session.user.user_metadata.provider_id,
-              username: session.user.user_metadata.full_name || session.user.user_metadata.custom_claims.global_name,
+              username: session.user.user_metadata.full_name,
               avatar_url: session.user.user_metadata.avatar_url,
               diamonds_balance: 0,
             })
@@ -61,10 +58,8 @@ const Auth = () => {
             throw createError;
           }
           
-          console.log('New user created:', newUser);
           setUser(newUser);
         } else {
-          console.log('Existing user found:', userData);
           setUser(userData);
         }
 

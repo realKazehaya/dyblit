@@ -12,7 +12,16 @@ export default defineConfig({
   build: {
     target: 'es2020',
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-slot'],
+          motion: ['framer-motion']
+        }
+      }
+    }
   },
   preview: {
     port: Number(process.env.PORT) || 4173,

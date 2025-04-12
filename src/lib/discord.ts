@@ -18,11 +18,8 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: 'https://cpcnzcdddafitedcyqvb.supabase.co/auth/v1/callback',
           scopes: 'identify email',
-          queryParams: {
-            prompt: 'consent'
-          }
         }
       });
 
