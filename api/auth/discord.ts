@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import DiscordOauth2 from 'discord-oauth2';
 
+const oauth = new DiscordOauth2();
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -17,17 +19,14 @@ export default async function handler(
   }
 
   try {
-    const oauth = new DiscordOauth2({
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-      redirectUri: `${process.env.VERCEL_URL}/auth/callback`,
-    });
-
     // Get Discord tokens
     const tokens = await oauth.tokenRequest({
+      clientId: process.env.DISCORD_CLIENT_ID!,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
       code,
       scope: 'identify email',
       grantType: 'authorization_code',
+      redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     });
 
     // Get user info from Discord

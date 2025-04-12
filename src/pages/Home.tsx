@@ -22,7 +22,7 @@ const Home = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative min-h-[80vh] flex flex-col items-center justify-center">
       {/* Floating Cloud */}
       <motion.img
-        src="/cloud.webp"
+        src="/assets/clouds.png"
         alt="Floating Cloud"
         className="absolute w-64 opacity-50"
         animate={{
