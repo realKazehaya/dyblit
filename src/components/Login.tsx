@@ -17,11 +17,13 @@ export default function Login() {
     setError('');
 
     try {
+      console.log('Attempting login with ID:', freeFireId);
       await login(freeFireId);
+      console.log('Login successful, redirecting...');
       navigate(isAdmin ? '/admin' : '/dashboard');
     } catch (err) {
+      console.error('Login failed:', err);
       setError('Login failed. Please try again.');
-      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +80,9 @@ export default function Login() {
               />
             </div>
             {error && (
-              <div className="text-red-500 text-sm">{error}</div>
+              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+                {error}
+              </div>
             )}
             <div className="text-xs text-gray-400">
               <Shield className="inline-block w-4 h-4 mr-1" />

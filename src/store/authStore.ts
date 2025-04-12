@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types/database';
 
+const NICKNAMES = [
+  'ShadowWarrior',
+  'PhoenixBlade',
+  'DragonSlayer',
+  'NightHawk',
+  'StormRider',
+  'FireFist',
+  'IcePhoenix',
+  'ThunderBolt',
+  'StarLord',
+  'DarkKnight',
+];
+
 interface AuthState {
   profile: Profile | null;
   isAdmin: boolean;
@@ -24,13 +37,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (freeFireId: string) => {
     try {
-      const { data: existingProfile } = await supabase
+      console.log('Starting login process for ID:', freeFireId);
+
+      // Check if profile exists
+      const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select()
         .eq('free_fire_id', freeFireId)
         .single();
 
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error checking existing profile:', profileError);
+        throw new Error('Failed to check existing profile');
+      }
+
       if (existingProfile) {
+        console.log('Found existing profile:', existingProfile);
         set({ 
           profile: existingProfile,
           isAdmin: existingProfile.free_fire_id === '999'
@@ -38,43 +60,62 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      // Create new profile
-      const { data: { user } } = await supabase.auth.signUp({
+      console.log('Creating new user account...');
+      // Create new user account
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email: `${freeFireId}@dyblit.temp`,
         password: `${freeFireId}${Date.now()}`,
       });
 
-      if (!user) throw new Error('Failed to create user');
+      if (signUpError || !user) {
+        console.error('Error creating user account:', signUpError);
+        throw new Error('Failed to create user account');
+      }
 
+      console.log('User account created:', user);
+
+      // Create new profile
+      const randomNickname = NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
       const newProfile: Partial<Profile> = {
         id: user.id,
         free_fire_id: freeFireId,
-        nickname: null,
+        nickname: randomNickname,
         nickname_changes: 0,
         diamonds: 0,
       };
 
-      const { data: profile, error } = await supabase
+      console.log('Creating new profile:', newProfile);
+      const { data: profile, error: insertError } = await supabase
         .from('profiles')
         .insert(newProfile)
         .select()
         .single();
 
-      if (error) throw error;
+      if (insertError || !profile) {
+        console.error('Error creating profile:', insertError);
+        throw new Error('Failed to create profile');
+      }
 
+      console.log('Profile created successfully:', profile);
       set({ 
         profile,
         isAdmin: profile.free_fire_id === '999'
       });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login process failed:', error);
       throw error;
     }
   },
 
   logout: async () => {
-    await supabase.auth.signOut();
-    set({ profile: null, isAdmin: false });
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      set({ profile: null, isAdmin: false });
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   },
 
   updateNickname: async (nickname: string) => {
