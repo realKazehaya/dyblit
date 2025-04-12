@@ -10,10 +10,16 @@ export const useDiscordAuth = create<DiscordState>((set) => ({
   isLoading: false,
   error: null,
   login: () => {
-    const baseUrl = import.meta.env.PROD 
-      ? 'https://dyblit.netlify.app'
-      : 'http://localhost:8888';
+    const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI;
     
-    window.location.href = `${baseUrl}/api/discord-auth`;
+    if (!clientId || !redirectUri) {
+      set({ error: 'Missing Discord configuration' });
+      return;
+    }
+
+    const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
+    
+    window.location.href = discordUrl;
   },
 }));
