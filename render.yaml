@@ -4,7 +4,10 @@ services:
     env: static
     buildCommand: npm run build
     staticPublishPath: ./dist
+    startCommand: npm run start
     envVars:
+      - key: PORT
+        value: 10000
       - key: VITE_DISCORD_CLIENT_ID
         sync: false
       - key: DISCORD_CLIENT_SECRET

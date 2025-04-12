@@ -13,5 +13,9 @@ export default defineConfig({
     target: 'es2020',
     outDir: 'dist',
     sourcemap: true
+  },
+  preview: {
+    port: Number(process.env.PORT) || 4173,
+    host: true
   }
 });
