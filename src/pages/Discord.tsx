@@ -10,8 +10,8 @@ const Discord = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <div className="backdrop-blur-md bg-gray-800/50 p-8 rounded-2xl shadow-lg border border-gray-700">
-          <MessageCircle className="w-16 h-16 text-purple-400 mx-auto mb-6" />
+        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-8 rounded-2xl shadow-lg border border-red-500/20">
+          <MessageCircle className="w-16 h-16 text-red-400 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-white mb-4">Join Our Discord Community</h1>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
             Join our Discord server to get help, stay updated with the latest news, and connect with other members of the FF Rewards community.

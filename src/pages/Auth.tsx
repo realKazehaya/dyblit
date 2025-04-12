@@ -10,23 +10,51 @@ const Auth = () => {
   const { setUser } = useAuthStore();
 
   useEffect(() => {
-    const session = searchParams.get('session');
-    const error = searchParams.get('error');
-
-    if (session) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            discord_id: session.user.user_metadata.discord_id,
-            username: session.user.user_metadata.username,
-            avatar_url: session.user.user_metadata.avatar_url,
-            diamonds_balance: 0,
-            created_at: session.user.created_at,
+    const code = searchParams.get('code');
+    
+    if (code) {
+      const authenticateWithDiscord = async () => {
+        try {
+          const response = await fetch('/api/auth/discord', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code }),
           });
-          navigate('/dashboard');
+
+          if (!response.ok) {
+            throw new Error('Authentication failed');
+          }
+
+          const data = await response.json();
+          
+          // Update user in Supabase
+          const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
+            provider: 'discord',
+            token: data.access_token,
+          });
+
+          if (authError) throw authError;
+
+          if (authData.user) {
+            setUser({
+              id: authData.user.id,
+              discord_id: authData.user.user_metadata.discord_id,
+              username: authData.user.user_metadata.username,
+              avatar_url: authData.user.user_metadata.avatar_url,
+              diamonds_balance: 0,
+              created_at: authData.user.created_at,
+            });
+            navigate('/dashboard');
+          }
+        } catch (error) {
+          console.error('Authentication error:', error);
+          navigate('/');
         }
-      });
+      };
+
+      authenticateWithDiscord();
     }
   }, [searchParams, navigate, setUser]);
 
@@ -37,7 +65,7 @@ const Auth = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="text-center"
       >
-        <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-gray-300">Authenticating with Discord...</p>
       </motion.div>
     </div>

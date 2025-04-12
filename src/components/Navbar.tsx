@@ -19,11 +19,11 @@ const Navbar = () => {
           <Link to="/" className="flex items-center">
             <motion.div
               whileHover={{ scale: 1.1 }}
-              className="text-purple-400"
+              className="text-red-400"
             >
               <Diamond size={24} />
             </motion.div>
-            <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+            <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400">
               Dyblit
             </span>
           </Link>
@@ -31,21 +31,21 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Link
               to="/earn"
-              className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2"
+              className="text-gray-300 hover:text-red-400 transition-colors flex items-center gap-2"
             >
               <Coins size={20} />
-              {t.earn}
+              EARN
             </Link>
             {isAuthenticated && (
               <>
                 <Link
                   to="/dashboard"
-                  className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2"
+                  className="text-gray-300 hover:text-red-400 transition-colors flex items-center gap-2"
                 >
                   <LayoutDashboard size={20} />
-                  {t.dashboard}
+                  DASHBOARD
                 </Link>
-                <div className="text-purple-400 flex items-center gap-2">
+                <div className="text-red-400 flex items-center gap-2">
                   <Diamond size={16} />
                   {user?.diamonds_balance || 0}
                 </div>
@@ -53,37 +53,37 @@ const Navbar = () => {
             )}
             <Link
               to="/faq"
-              className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2"
+              className="text-gray-300 hover:text-red-400 transition-colors flex items-center gap-2"
             >
               <HelpCircle size={20} />
               FAQ
             </Link>
             <Link
               to="/discord"
-              className="text-gray-300 hover:text-purple-400 transition-colors flex items-center gap-2"
+              className="text-gray-300 hover:text-red-400 transition-colors flex items-center gap-2"
             >
               <MessageCircle size={20} />
-              Discord
+              DISCORD
             </Link>
             {isAuthenticated ? (
               <Link
                 to="/withdraw"
-                className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-shadow flex items-center gap-2"
+                className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-shadow flex items-center gap-2"
               >
                 <Wallet2 size={20} />
-                {t.withdraw}
+                WITHDRAW
               </Link>
             ) : (
               <button
                 onClick={() => login()}
-                className="bg-[#5865F2] text-white px-4 py-2 rounded-lg shadow-lg hover:bg-[#4752C4] transition-colors flex items-center gap-2"
+                className="bg-[#5865F2] text-white px-4 py-2 rounded-lg shadow-lg hover:bg-[#4752C4] transition-colors flex items-center gap-2 font-medium"
               >
                 <img
                   src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_white_RGB.png"
                   alt="Discord"
                   className="w-5 h-5"
                 />
-                {t.login}
+                LOGIN
               </button>
             )}
           </div>

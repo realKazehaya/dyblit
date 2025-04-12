@@ -16,7 +16,12 @@ import Admin from './pages/Admin';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('/assets/redground.gif')`,
+        }}
+      >
         <WelcomePopup />
         <Navbar />
         <Routes>
@@ -33,6 +38,6 @@ function App() {
       </div>
     </Router>
   );
-};
+}
 
 export default App;
