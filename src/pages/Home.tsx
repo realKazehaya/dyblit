@@ -13,7 +13,7 @@ const Home = () => {
   React.useEffect(() => {
     const interval = setInterval(() => {
       setCurrentLetterIndex((prev) => (prev + 1) % (title.length + 1));
-    }, 2000);
+    }, 150); // Más rápido: reducido de 2000ms a 150ms
 
     return () => clearInterval(interval);
   }, []);
@@ -24,13 +24,14 @@ const Home = () => {
       <motion.img
         src="/assets/clouds.png"
         alt="Floating Cloud"
-        className="absolute w-64 opacity-50"
+        className="absolute w-96" // Más grande: cambiado de w-64 a w-96
         animate={{
-          y: [0, -20, 0],
-          x: [-10, 10, -10]
+          y: [0, -30, 0], // Más movimiento vertical
+          x: [-20, 20, -20], // Más movimiento horizontal
+          rotate: [-2, 2, -2] // Añadido rotación suave
         }}
         transition={{
-          duration: 6,
+          duration: 8, // Más lento: aumentado de 6s a 8s
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -51,7 +52,7 @@ const Home = () => {
               }}
               exit={{ opacity: 0, y: -20 }}
               transition={{
-                duration: 0.3,
+                duration: 0.2, // Más rápido: reducido de 0.3s a 0.2s
                 ease: "easeInOut"
               }}
               className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400"

@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import DiscordOauth2 from 'discord-oauth2';
+import { OAuth2Client } from 'discord-oauth2';
 import { createClient } from '@supabase/supabase-js';
 
-const oauth = new DiscordOauth2({
-  clientId: process.env.VITE_DISCORD_CLIENT_ID,
-  clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  redirectUri: process.env.VITE_DISCORD_REDIRECT_URI,
+const oauth = new OAuth2Client({
+  clientId: process.env.VITE_DISCORD_CLIENT_ID!,
+  clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+  redirectUri: process.env.VITE_DISCORD_REDIRECT_URI!,
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -57,22 +57,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Sign in with Supabase
-    const { data: authData, error: authError } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: process.env.VITE_DISCORD_REDIRECT_URI,
-      }
-    });
-
-    if (authError) {
-      console.error('Auth error:', authError);
-      throw authError;
-    }
-
     return res.status(200).json({
       access_token: tokens.access_token,
-      user: authData.user,
+      user: userData,
     });
   } catch (error) {
     console.error('Discord auth error:', error);
