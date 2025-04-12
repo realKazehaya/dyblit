@@ -14,7 +14,7 @@ const Home = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400">
           {t.title}
         </h1>
         <p className="mt-4 text-xl text-gray-300">
@@ -28,24 +28,24 @@ const Home = () => {
         transition={{ delay: 0.2 }}
         className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
       >
-        <div className="backdrop-blur-md bg-gray-800/50 p-6 rounded-2xl shadow-lg border border-gray-700">
-          <Diamond className="w-12 h-12 text-purple-400 mb-4" />
+        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
+          <Diamond className="w-12 h-12 text-red-400 mb-4" />
           <h3 className="text-xl font-semibold mb-2 text-white">{t.features.earn.title}</h3>
           <p className="text-gray-300">
             {t.features.earn.description}
           </p>
         </div>
 
-        <div className="backdrop-blur-md bg-gray-800/50 p-6 rounded-2xl shadow-lg border border-gray-700">
-          <CheckCircle className="w-12 h-12 text-purple-400 mb-4" />
+        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
+          <CheckCircle className="w-12 h-12 text-red-400 mb-4" />
           <h3 className="text-xl font-semibold mb-2 text-white">{t.features.withdraw.title}</h3>
           <p className="text-gray-300">
             {t.features.withdraw.description}
           </p>
         </div>
 
-        <div className="backdrop-blur-md bg-gray-800/50 p-6 rounded-2xl shadow-lg border border-gray-700">
-          <DollarSign className="w-12 h-12 text-purple-400 mb-4" />
+        <div className="backdrop-blur-md bg-gradient-to-br from-red-900/30 to-gray-900/30 p-6 rounded-2xl shadow-lg border border-red-500/20">
+          <DollarSign className="w-12 h-12 text-red-400 mb-4" />
           <h3 className="text-xl font-semibold mb-2 text-white">{t.features.daily.title}</h3>
           <p className="text-gray-300">
             {t.features.daily.description}
